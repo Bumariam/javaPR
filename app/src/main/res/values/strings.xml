@@ -51,6 +51,9 @@
     <string name="ml_prof">ml</string>
     <string name="count_water">0</string>
     <string name="count_pills">0</string>
+    <string name="logout">Logout</string>
+    <string name="email">Email:</string>
+    <string name="name">Name:</string>
 
 
 </resources>

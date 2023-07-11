@@ -86,13 +86,14 @@ public class MainActivity extends AppCompatActivity {
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
                 int id = item.getItemId();
 
-                if (id == R.id.home) {
+                if (id == R.id.fit) {
+                    // Проверяем, если уже находимся в активити FitActivity, то не создаем новое намерение
+                    startActivity(new Intent(MainActivity.this, FitActivity.class));
+                    finish(); // Закрываем текущую активити, чтобы избежать дублирования
+                    return true;
+                } else if (id == R.id.home) {
                     // Открываем активити HomeActivity
                     startActivity(new Intent(MainActivity.this, MainActivity.class));
-                    return true;
-                } else if (id == R.id.fit) {
-                    // Открываем активити FitActivity
-                    startActivity(new Intent(MainActivity.this, FitActivity.class));
                     return true;
                 } else if (id == R.id.profile) {
                     // Открываем активити ProfileActivity
@@ -103,4 +104,5 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
 }
