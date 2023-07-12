@@ -54,6 +54,12 @@
     <string name="logout">Logout</string>
     <string name="email">Email:</string>
     <string name="name">Name:</string>
+    <string name="add_water">add</string>
+    <string name="all_water">ALL: 2000 ml</string>
+    <string name="_0">2000 : 0 ml</string>
+    <string name="add">add</string>
+    <string name="all">Дневная норма: 2000 мл</string>
+    <string name="ml">Потреблено: 0 мл</string>
 
 
 </resources>
