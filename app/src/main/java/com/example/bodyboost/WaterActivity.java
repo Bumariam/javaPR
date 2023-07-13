@@ -1,13 +1,25 @@
 package com.example.bodyboost;
 
+import android.app.AlarmManager;
+import android.app.AlertDialog;
+import android.app.PendingIntent;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.cardview.widget.CardView;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 
 import java.util.Calendar;
 
@@ -28,6 +40,11 @@ public class WaterActivity extends AppCompatActivity {
     private Button btnDeleteEntry;
     private ProgressBar progressBar;
     private TextView tvPercentage;
+    private CardView reminderCard;
+    private RadioGroup radioGroup;
+    private Button btnSetReminder;
+
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -43,6 +60,9 @@ public class WaterActivity extends AppCompatActivity {
         btnDeleteEntry = findViewById(R.id.btnDeleteEntry);
         progressBar = findViewById(R.id.progressBar);
         tvPercentage = findViewById(R.id.tvPercentage);
+        reminderCard = findViewById(R.id.reminderCard);
+        radioGroup = findViewById(R.id.radioGroup);
+        btnSetReminder = findViewById(R.id.btnSetReminder);
 
         loadConsumedWater(); // Загрузка сохраненного значения потребленной воды
 
@@ -80,6 +100,13 @@ public class WaterActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 deleteEntry();
+            }
+        });
+
+        btnSetReminder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showReminderCard();
             }
         });
     }
@@ -133,5 +160,55 @@ public class WaterActivity extends AppCompatActivity {
     private void updateProgressBarPercentage() {
         int progress = (int) ((float) consumedWater / (float) dailyGoal * 100); // Расчет процента заполненности
         tvPercentage.setText(progress + "%");
+    }
+
+    public class WaterReminderBroadcastReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            Toast.makeText(context, "Пора пить воду!", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void showReminderCard() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View reminderCardView = LayoutInflater.from(this).inflate(R.layout.reminder_card, null);
+        builder.setView(reminderCardView);
+        AlertDialog dialog = builder.create();
+
+        // Настройка обработчика нажатия кнопки "Установить напоминание"
+        Button btnSetReminder = reminderCardView.findViewById(R.id.btnSetReminder);
+        RadioGroup radioGroup = reminderCardView.findViewById(R.id.radioGroup);
+        btnSetReminder.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                int selectedInterval = 0;
+                int checkedRadioButtonId = radioGroup.getCheckedRadioButtonId();
+                if (checkedRadioButtonId == R.id.radioButton30min) {
+                    selectedInterval = 30;
+                } else if (checkedRadioButtonId == R.id.radioButton1hour) {
+                    selectedInterval = 60;
+                } else if (checkedRadioButtonId == R.id.radioButton2hours) {
+                    selectedInterval = 120;
+                }
+                setReminder(selectedInterval);
+                dialog.dismiss();
+            }
+        });
+        
+        dialog.show();
+    }
+
+    private void setReminder(int interval) {
+        Intent intent = new Intent(this, WaterReminderBroadcastReceiver.class);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, 0, intent, PendingIntent.FLAG_IMMUTABLE);
+
+        // Установка напоминания с выбранным интервалом
+        AlarmManager alarmManager = (AlarmManager) getSystemService(Context.ALARM_SERVICE);
+        alarmManager.setInexactRepeating(AlarmManager.RTC_WAKEUP, System.currentTimeMillis(), interval * 60 * 1000, pendingIntent);
+
+        // Отображение сообщения о том, что интервал установлен
+        String message = "Интервал напоминания установлен: " + interval + " минут";
+        Toast.makeText(this, message, Toast.LENGTH_SHORT).show();
+
     }
 }
